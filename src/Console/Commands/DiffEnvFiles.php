@@ -3,6 +3,7 @@
 namespace romanzipp\EnvDiff\Console\Commands;
 
 use Illuminate\Console\Command;
+use Dotenv\Exception\InvalidPathException;
 use romanzipp\EnvDiff\Services\DiffService;
 
 class DiffEnvFiles extends Command
@@ -42,7 +43,11 @@ class DiffEnvFiles extends Command
             $service->config['show_values'] = true;
         }
 
-        $service->add($files);
+        try {
+            $service->add($files);
+        } catch (InvalidPathException $e) {
+            $this->artisan('env:diff create');
+        }
 
         $service->displayTable();
     }
