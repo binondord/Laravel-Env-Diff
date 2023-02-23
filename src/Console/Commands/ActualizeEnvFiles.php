@@ -4,16 +4,16 @@ namespace romanzipp\EnvDiff\Console\Commands;
 
 use Illuminate\Console\Command;
 use Dotenv\Exception\InvalidPathException;
-use romanzipp\EnvDiff\Services\DiffService;
+use romanzipp\EnvDiff\Services\ActualizeService;
 
-class DiffEnvFiles extends Command
+class ActualizeEnvFiles extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'env:diff
+    protected $signature = 'env:actualize
                             {files? : Specify environment files, overriding config}
                             {--values : Display existing environment values}';
 
@@ -22,7 +22,7 @@ class DiffEnvFiles extends Command
      *
      * @var string
      */
-    protected $description = 'Create a visual Diff of .env and .env.example files';
+    protected $description = 'Actualize a visual Diff of .env and .env.example files';
 
     /**
      * Execute the console command.
@@ -31,25 +31,21 @@ class DiffEnvFiles extends Command
      */
     public function handle()
     {
-        $service = app(DiffService::class);
-
         $files = config('env-diff.files') ?: ['.env'];
-        #$files = $service->scanDirForEnvs();
 
         if ($overrideFiles = $this->argument('files')) {
             $files = explode(',', $overrideFiles);
         }
 
+        $service = new ActualizeService();
+
         if (true === $this->option('values')) {
             $service->config['show_values'] = true;
         }
-
+        
         $service->add($files);
 
-        /*if ($service->missingFilesExists()) {
-            $this->call('env:actualize');
-        }*/
-
-        $service->displayTable();
+        #$service->displayTable();
+        $service->getMissingFiles();
     }
 }

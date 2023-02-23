@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Wujunze\Colors;
+use romanzipp\EnvDiff\Services\View\ConsoleTable;
 
 class DiffService
 {
@@ -17,16 +18,11 @@ class DiffService
     private $data;
 
     /**
-     * Console table.
+     * ConsoleTable.
      *
-     * @var Table|null
+     * @var ConsoleTable|null
      */
-    private $table;
-
-    /**
-     * @var \Symfony\Component\Console\Output\BufferedOutput
-     */
-    private $output;
+    private $consoleTable;
 
     /**
      * Package configuration.
@@ -39,9 +35,7 @@ class DiffService
     {
         $this->config = config('env-diff');
 
-        $this->table = new Table(
-            $this->output = new BufferedOutput()
-        );
+        $this->consoleTable = new ConsoleTable();
     }
 
     /**
@@ -53,11 +47,21 @@ class DiffService
     {
         $files = is_array($file) ? $file : [$file];
 
-        foreach ($files as $envFile) {
-            $this->setData(
-                $envFile,
-                Dotenv::createMutable($this->getPath(), $envFile)->load()
-            );
+        foreach ($files as $i =>$envFile) {
+            #$exists = $this->markFileStatus($envFile);
+
+            #if ($exists) {
+                $this->setData(
+                    $envFile,
+                        Dotenv::createMutable($this->getPath(), $envFile)->load()
+                    );
+            /*}else {
+                $this->hasMissingFiles = true;
+                $this->setData(
+                    $envFile,
+                    [],
+                );
+            }*/
         }
     }
 
@@ -96,6 +100,11 @@ class DiffService
         }
 
         return $this->data[$file] ?? [];
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 
     /**
@@ -142,12 +151,7 @@ class DiffService
         return $diff;
     }
 
-    /**
-     * Build table.
-     *
-     * @return void
-     */
-    public function buildTable(): void
+    public function buildTableHeader()
     {
         $files = array_keys($this->data);
 
@@ -157,7 +161,12 @@ class DiffService
             $headers[] = $file;
         }
 
-        $this->table->setHeaders($headers);
+        return $headers;
+    }
+
+    public function buildTableContent()
+    {
+        $files = array_keys($this->data);
 
         $showValues = $this->config['show_values'] ?? false;
 
@@ -168,13 +177,13 @@ class DiffService
                 $value = null;
 
                 if ( ! $showValues) {
-                    $value = $this->valueNotFound();
+                    $value = $this->consoleTable->valueNotFound();
 
                     if (true === $containing[$file]) {
-                        $value = $this->valueOkay();
+                        $value = $this->consoleTable->valueOkay();
                     }
                 } else {
-                    $value = $this->getColoredString('MISSING', 'red');
+                    $value = $this->consoleTable->getColoredString('MISSING', 'red');
 
                     $existing = $this->getData($file)[$variable] ?? null;
 
@@ -186,58 +195,16 @@ class DiffService
                 $row[] = $value;
             }
 
-            $this->table->addRow($row);
+            $this->consoleTable->addRow($row);
         }
     }
 
-    /**
-     * Build & display table.
-     *
-     * @return void
-     */
-    public function displayTable(): void
+    public function displayTable()
     {
-        $this->buildTable();
-
-        $this->table->render();
-
-        echo $this->output->fetch();
-    }
-
-    /**
-     * Get console table string value.
-     *
-     * @return string
-     */
-    private function valueOkay(): string
-    {
-        return $this->getColoredString('Y', 'green');
-    }
-
-    /**
-     * Get console table string value.
-     *
-     * @return string
-     */
-    private function valueNotFound(): string
-    {
-        return $this->getColoredString('N', 'red');
-    }
-
-    /**
-     * Color a string for shell output if enabled via config.
-     *
-     * @param string $string
-     * @param string $color
-     *
-     * @return string
-     */
-    private function getColoredString(string $string, string $color): string
-    {
-        if ( ! $this->config['use_colors']) {
-            return $string;
-        }
-
-        return (new Colors())->getColoredString($string, $color);
+        $header = $this->buildTableHeader();
+        $this->consoleTable->addHeader($header);
+        $this->consoleTable->setUseColors($this->config['use_colors']);
+        $this->buildTableContent();
+        $this->consoleTable->displayTable();
     }
 }
