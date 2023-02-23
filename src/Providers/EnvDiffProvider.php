@@ -3,7 +3,11 @@
 namespace romanzipp\EnvDiff\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use romanzipp\EnvDiff\Console\Commands\ActualizeEnvFiles;
 use romanzipp\EnvDiff\Console\Commands\DiffEnvFiles;
+
+use romanzipp\EnvDiff\Services\DiffService;
+use romanzipp\EnvDiff\Services\View\ConsoleTable;
 
 class EnvDiffProvider extends ServiceProvider
 {
@@ -20,6 +24,7 @@ class EnvDiffProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ActualizeEnvFiles::class,
                 DiffEnvFiles::class,
             ]);
         }

@@ -12,13 +12,13 @@ class FileLoadingTest extends TestCase
     {
         $this->expectException(InvalidPathException::class);
 
-        $service = new DiffService(__DIR__ . '/Support');
+        $service = new DiffService();
         $service->add('.env.missing');
     }
 
     public function testWrongDataGetter()
     {
-        $service = new DiffService(__DIR__ . '/Support');
+        $service = new DiffService();
         $service->add('.env');
 
         $this->assertEquals([], $service->getData('.env.missing'));
@@ -26,7 +26,7 @@ class FileLoadingTest extends TestCase
 
     public function testSingleFileSingleVariable()
     {
-        $service = new DiffService(__DIR__ . '/Support');
+        $service = new DiffService();
         $service->add('.env');
 
         $this->assertEquals([
@@ -36,7 +36,7 @@ class FileLoadingTest extends TestCase
 
     public function testSingleFileMultipleVariables()
     {
-        $service = new DiffService(__DIR__ . '/Support');
+        $service = new DiffService();
         $service->add('.env.second');
 
         $this->assertEquals([
