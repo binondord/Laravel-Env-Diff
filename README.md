@@ -66,6 +66,8 @@ return [
 ```
 $ php artisan env:diff
               {files? : Specify environment files, overriding config}
+              {conf? : Specify config files, overriding default env-diff.php}
+              {--actualize : Actualize differences from two env files}
               {--values : Display existing environment values}';
 ```
 
