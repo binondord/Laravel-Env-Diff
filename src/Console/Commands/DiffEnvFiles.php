@@ -66,7 +66,7 @@ class DiffEnvFiles extends Command
         }
 
         if ($hasScanDiff > 0 && 
-            $this->confirm('Found more .env files than set in config file. Do you want to update the config file?', true))  {
+            $this->confirm('Found more .env files compare to what\'s currently set in config file. Do you want to update the config file?', true))  {
             $configWriter = new ConfigWriter();
             $configWriter->write(
                 $configWriter->setup([
@@ -88,16 +88,14 @@ class DiffEnvFiles extends Command
 
         $service->displayTable();
 
-        $defaultIndex = 0;
-
         if (true === $this->option('actualize')) {
             $targetFile = ".env";
             $baseFile = ".env.example";
             if (count($files) != 2) {
                 $targetFile = $this->choice(
-                    'What is your target file?',
+                    'Select your target file?',
                     $scannedFiles,
-                    $defaultIndex
+                    0
                 );
 
                 $this->info("You've selected: $targetFile");
@@ -107,7 +105,7 @@ class DiffEnvFiles extends Command
                 });
 
                 $baseFile = $this->choice(
-                    'What is your base file?',
+                    'Select your base file?',
                     $baseChoices,
                     key($baseChoices)
                 );
