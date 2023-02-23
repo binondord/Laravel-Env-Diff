@@ -134,14 +134,20 @@ class DiffEnvFiles extends Command
                 foreach($service->diff() as $diffKey => $diffFileCompared) 
                 {
                     $existing = $service->getData($baseFile)[$diffKey] ?? null;
+                    $targetExistingValue = $service->getData($targetFile)[$diffKey] ?? null;
 
                     if (null !== $existing) {
                         $exampleValue = $existing;
+                        $textCurrentValue = "$diffKey=";
+
+                        if (null !== $targetExistingValue) {
+                            $textCurrentValue = (null !== $targetExistingValue) ? "$diffKey=$targetExistingValue" : "$diffKey=";
+                        }
 
                         if (!empty($exampleValue)) {
-                            $finalValue = $this->ask("$diffKey=", $exampleValue);
+                            $finalValue = $this->ask($textCurrentValue, $exampleValue);
                         } else {
-                            $finalValue = $this->ask("$diffKey=");
+                            $finalValue = $this->ask($textCurrentValue);
                         }
 
                         $this->info("You've entered: $finalValue");
@@ -151,6 +157,7 @@ class DiffEnvFiles extends Command
                 }
 
                 $envContent = file_get_contents(base_path("$targetFile"));
+                file_put_contents(base_path("$targetFile-backup-".date("Y-m-d-His")), $envContent);
                 $envContent .= $appendText;
                 file_put_contents(base_path("$targetFile"), $envContent);
 
