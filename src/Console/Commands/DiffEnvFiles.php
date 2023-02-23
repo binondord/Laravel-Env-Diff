@@ -153,6 +153,8 @@ class DiffEnvFiles extends Command
                 $envContent = file_get_contents(base_path("$targetFile"));
                 $envContent .= $appendText;
                 file_put_contents(base_path("$targetFile"), $envContent);
+
+                $this->info("done!");
             }
         }
     }
