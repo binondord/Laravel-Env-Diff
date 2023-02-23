@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Wujunze\Colors;
 use romanzipp\EnvDiff\Services\View\ConsoleTable;
 
-class ScanDirForEnvs
+class ScanForEnvs
 {
     /**
      * @var array<string, mixed>
@@ -20,7 +20,9 @@ class ScanDirForEnvs
      */
     protected $hasMissingFiles = false;
 
-    public function scanDirForEnvs($config, $path): array
+    protected $scannedFiles = [];
+
+    public function scan($config, $path): array
     {
         $this->config = $config;
         $envFile = $this->config['file_target'];
@@ -32,6 +34,8 @@ class ScanDirForEnvs
         foreach($files as $file) {
             $fileNames[] = basename($file);
         }
+
+        $this->scannedFiles = $fileNames;
         return $fileNames;
     }
 
@@ -53,5 +57,19 @@ class ScanDirForEnvs
     public function missingFilesExists()
     {
         return $this->hasMissingFiles;
+    }
+
+    public function displayTable()
+    {
+        $consoleTable = new ConsoleTable();
+        $consoleTable->addHeader(["env files -->", ...$this->scannedFiles]);
+
+        $inConfigFiles = $this->config['files'];
+        $FoundInConfig = ["in config?", ...array_map(function($file) use($inConfigFiles) {
+            return in_array($file, $inConfigFiles) ? 'Y' : 'N';
+        }, $this->scannedFiles)];
+
+        $consoleTable->addRow($FoundInConfig);
+        $consoleTable->displayTable();
     }
 }

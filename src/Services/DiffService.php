@@ -70,7 +70,7 @@ class DiffService
      *
      * @return string
      */
-    private function getPath(): string
+    public function getPath(): string
     {
         return $this->config['path'] ?? base_path();
     }

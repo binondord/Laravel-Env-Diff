@@ -1,10 +1,12 @@
 <?php
 
-namespace romanzipp\EnvDiff\Console\Types;
+namespace romanzipp\EnvDiff\Types;
 
 class ConfigWriterDataType
 {
     public string $configFile;
+
+    public string $key;
 
     public array $keyValuePair = [];
 
@@ -18,8 +20,13 @@ class ConfigWriterDataType
         return $this->configFile;
     }
 
-    public function getKeyValue() 
+    public function getData() 
     {
-        return $this->$keyValuePair;
+        return $this->keyValuePair;
+    }
+
+    public function setKeyValue($key, $value) 
+    {
+        $this->keyValuePair[$key] = $value;
     }
 }
